@@ -22,7 +22,6 @@
   border: none;
   outline: none;
   transition: transform 250ms green;
-  background-color: hotpink;
 }
 
 .btn:hover {

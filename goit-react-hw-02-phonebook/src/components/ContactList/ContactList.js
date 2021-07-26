@@ -1,37 +1,57 @@
-import PropTypes from "prop-types";
-import s from "./ContactList.module.css";
-import { AiOutlineClose } from "react-icons/ai";
+import { useSelector, useDispatch } from 'react-redux';
+import { deleteContact } from '../../redux/contacts/contacts-actions';
+import {
+  getVisibleContacts,
+  getContacts,
+} from '../../redux/contacts/contacts-selectors';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import { ReactComponent as DeleteIcon } from '../../img/delete.svg';
+import s from './ContactList.module.css';
+import popTransition from '../../untils/transitions/pop.module.css';
 
-function ContactList({ contacts, onDeleteContact }) {
+function ContactList() {
+  const dispatch = useDispatch();
+  const visibleContacts = useSelector(getVisibleContacts);
+  const contacts = useSelector(getContacts);
+
   return (
-    <ul className={s.list}>
-      {contacts.map(({ id, name, number }) => (
-        <li className={s.item} key={id}>
-          <p className={s.info}>
-            {name}: {number}
-          </p>
-          <button
-            className={s.btn}
-            type="button"
-            onClick={() => onDeleteContact(id)}
+    <>
+      <CSSTransition
+        in={!contacts.length}
+        timeout={250}
+        classNames={popTransition}
+        mountOnEnter
+        unmountOnExit
+      >
+        <p>Your phonebook is empty. Please add contact.</p>
+      </CSSTransition>
+      <TransitionGroup component="ul" className={s.list}>
+        {visibleContacts.map(({ id, name, number }) => (
+          <CSSTransition
+            key={id}
+            timeout={250}
+            mountOnEnter
+            unmountOnExit
+            classNames={popTransition}
           >
-            <AiOutlineClose />
-          </button>
-        </li>
-      ))}
-    </ul>
+            <li className={s.item}>
+              <p className={s.info}>
+                <b>{name}</b>
+                <em>{number}</em>
+              </p>
+              <button
+                className={s.btn}
+                type="button"
+                onClick={() => dispatch(deleteContact(id))}
+              >
+                <DeleteIcon width="26" height="26" />
+              </button>
+            </li>
+          </CSSTransition>
+        ))}
+      </TransitionGroup>
+    </>
   );
 }
-
-ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
-  onDeleteContact: PropTypes.func.isRequired,
-};
 
 export default ContactList;
